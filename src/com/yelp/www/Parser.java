@@ -1,7 +1,12 @@
 package com.yelp.www;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,8 +14,7 @@ import org.jsoup.select.Elements;
 
 public class Parser implements Runnable{
 	private String url;
-	private int timeOut = 10000;
-	private static int count = 0;
+	private int timeOut = 20000;
 	
 	public Parser(String url) {
 		this.url = url;
@@ -27,7 +31,14 @@ public class Parser implements Runnable{
 	public void parseReview(String content) {
 		Document review = Jsoup.parse(content);
 		String userName = review.select(".user-display-name").text();
-		String date = review.select(".rating-qualifier").select("meta").attr("content");
+		String date_string = review.select(".rating-qualifier").select("meta").attr("content");
+		DateFormat format = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH);
+		Date date;
+		try {
+			date = format.parse(date_string);
+		} catch (ParseException e) {
+			date = null;
+		}
 		String rating = review.select(".rating-very-large").select("meta").attr("content");
 		String comment = review.select(".review-content p").text();
 		System.out.println(userName + " -> " + "(" + date + ") (" + rating + ") " + comment);
